@@ -19,7 +19,7 @@ RUN echo "$pubkey_file" > ~/.ssh/id_rsa.pub && chmod 600 ~/.ssh/id_rsa.pub
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 # install gcc g++ git
-RUN apk add --no-cache git make libtool autoconf bzip2 gcc g++ upx 
+RUN apk add --no-cache git make libtool autoconf bzip2 gcc g++ upx openssh
 
 RUN go version && \
     gcc -v && \
