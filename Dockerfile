@@ -1,19 +1,10 @@
-FROM golang:1.15.2-alpine3.12
+FROM golang:1.23.2-alpine3.19
 
-LABEL version="golang-1.15 alpine-3.12" maintainer="lin"
+LABEL version="golang-1.23 alpine-3.19" maintainer="lin"
 
-ARG key_file
-ARG host_file
-ARG pubkey_file
-
-# add ssh
-RUN mkdir ~/.ssh/
-RUN chmod 400 ~/.ssh
-RUN echo "$key_file" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
-RUN echo "$host_file" > ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
-RUN echo "$pubkey_file" > ~/.ssh/id_rsa.pub && chmod 600 ~/.ssh/id_rsa.pub
-
-RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
+ARG ACCESS_TOKEN
+ARG USERNAME
+ARG GIT_REGISTRY
 
 # install gcc g++ git
 RUN apk add --no-cache git make libtool autoconf bzip2 gcc g++ upx openssh
@@ -21,5 +12,11 @@ RUN apk add --no-cache git make libtool autoconf bzip2 gcc g++ upx openssh
 RUN go version && \
     gcc -v && \
     git version
+
+# add ssh
+RUN go env -w GONOPROXY="${GIT_REGISTRY}" && \
+    go env -w GOPRIVATE="${GIT_REGISTRY}" && \
+    git config --global http.extraheader "PRIVATE-TOKEN: ${ACCESS_TOKEN}" && \
+    git config --global url."https://${USERNAME}:${ACCESS_TOKEN}@${GIT_REGISTRY}".insteadOf "https://${GIT_REGISTRY}"
 
 WORKDIR $GOPATH
